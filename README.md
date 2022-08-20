@@ -38,6 +38,11 @@
     ```console
     sudo -H pip3 install virtualenv
     ```
+1. Clone the project
+1. Go to the directory
+    ```console
+    cd proj-dir
+    ```
 
 1. Create virtual environment
     ```console
@@ -150,6 +155,7 @@
     ```console
     sudo systemctl restart gunicorn
     ```
+    - Also run the above two commands after change in code
 
 ### Configure Nginx to Proxy Pass to Gunicorn
 
