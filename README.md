@@ -1,5 +1,7 @@
 # django-template
-Django Template hosted on AWS EC2 with NGINX
+### Django Template hosted on AWS EC2 with NGINX
+
+[Blog Link](https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-20-04)
 
 1. Log in ubuntu server
     ```console
