@@ -37,6 +37,21 @@ Django Template hosted on AWS EC2 with NGINX
     sudo -H pip3 install virtualenv
     ```
 
+1. Create virtual environment
+    ```console
+    virtualenv env
+    ```
+
+1. Activate env
+    ```console
+    source env/bin/activate
+    ```
+
+1. Install requirements
+    ```console
+    pip3 install -r requirements.txt
+    ```
+
 1. Creating systemd Socket and Service Files for Gunicorn
     - The Gunicorn socket will be created at boot and will listen for connections. When a connection occurs, systemd will automatically start the Gunicorn process to handle the connection.
     ```console
@@ -119,4 +134,62 @@ Django Template hosted on AWS EC2 with NGINX
 1. To test the socket activation mechanism, we can send a connection to the socket through curl by typing:
     ```console
     curl --unix-socket /run/gunicorn.sock localhost
+    ```
+
+1. If the output from curl or the output of systemctl status indicates that a problem occurred, check the logs for additional details:
+    ```console
+    sudo journalctl -u gunicorn
+    ```
+
+1. Check your /etc/systemd/system/gunicorn.service file for problems. If you make changes to the /etc/systemd/system/gunicorn.service file, reload the daemon to reread the service definition and restart the Gunicorn process by typing:
+    ```console
+    sudo systemctl daemon-reload
+    ```
+    ```console
+    sudo systemctl restart gunicorn
+    ```
+
+### Configure Nginx to Proxy Pass to Gunicorn
+
+1. Start by creating and opening a new server block in Nginx’s sites-available directory:
+    ```console
+    sudo nano /etc/nginx/sites-available/myproject
+    ```
+
+1. Configure the file
+    ```console
+    server {
+        listen 80;
+        server_name 3.110.56.75, domain.com(if available);
+
+        location = /favicon.ico { access_log off; log_not_found off; }
+
+        location / {
+            include proxy_params;
+            proxy_pass http://unix:/run/gunicorn.sock;
+        }
+    }
+    ```
+
+1. Save and close the file when you are finished. Now, we can enable the file by linking it to the sites-enabled directory:
+    ```console
+    sudo ln -s /etc/nginx/sites-available/myproject /etc/nginx/sites-enabled
+    ```
+
+1. Test your Nginx configuration for syntax errors by typing:
+    ```console
+    sudo nginx -t
+    ```
+
+1. If no errors are reported, go ahead and restart Nginx by typing:
+    ```console
+    sudo systemctl restart nginx
+    ```
+
+1. Finally, we need to open up our firewall to normal traffic on port 80. Since we no longer need access to the development server, we can remove the rule to open port 8000 as well:
+    ```console
+    sudo ufw delete allow 8000
+    ```
+    ```console
+    sudo ufw allow 'Nginx Full'
     ```
